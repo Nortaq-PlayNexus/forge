@@ -151,3 +151,67 @@ def show_warning(message: str):
 def show_success(message: str):
     """Show a success message."""
     console.print(f"[green]✓[/green] {message}")
+
+
+def print_kubernetes(manifests: dict[str, str]):
+    """Display K8s YAML manifests."""
+    for filename, content in manifests.items():
+        console.print(f"\n[bold cyan]☸ {filename}[/bold cyan]")
+        console.print("─" * 60)
+        console.print(content, highlight=True)
+
+
+def print_cost_comparison(comparisons: list[dict]):
+    """Show provider cost comparison table."""
+    table = Table(
+        title="Provider Cost Comparison",
+        box=box.ROUNDED,
+        title_style="bold magenta",
+        border_style="magenta",
+        padding=(0, 1),
+    )
+    table.add_column("Provider", style="bold")
+    table.add_column("Compute", justify="right")
+    table.add_column("Database", justify="right")
+    table.add_column("Cache", justify="right")
+    table.add_column("Total", justify="right", style="bold")
+
+    for c in comparisons:
+        est = c["estimate"]
+        table.add_row(
+            c["provider"].upper(),
+            f"${est.compute:.2f}",
+            f"${est.database:.2f}",
+            f"${est.cache:.2f}",
+            f"${est.total:.2f}",
+        )
+
+    console.print(table)
+    console.print(f"\n[dim]Best option: [bold]{comparisons[0]['provider'].upper()}[/bold] at ${comparisons[0]['total']:.2f}/mo[/dim]")
+
+
+def print_rollback_options(snapshots: list[dict]):
+    """Show available snapshots."""
+    table = Table(
+        title="Deployment Snapshots",
+        box=box.ROUNDED,
+        title_style="bold yellow",
+        border_style="yellow",
+        padding=(0, 1),
+    )
+    table.add_column("ID", style="bold cyan")
+    table.add_column("Timestamp")
+    table.add_column("Keys")
+
+    for s in snapshots:
+        table.add_row(s["id"], s["timestamp"], ", ".join(s.get("keys", [])))
+
+    console.print(table)
+
+
+def print_ci_config(config: dict[str, str]):
+    """Display generated CI/CD config."""
+    for filename, content in config.items():
+        console.print(f"\n[bold blue]🔧 {filename}[/bold blue]")
+        console.print("─" * 60)
+        console.print(content, highlight=True)

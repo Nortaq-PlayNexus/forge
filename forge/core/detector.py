@@ -39,6 +39,27 @@ STACK_SIGNATURES = {
         "services": ["ruby"],
         "label": "Ruby",
     },
+    "deno": {
+        "files": ["deno.json", "deno.jsonc"],
+        "services": ["deno"],
+        "label": "Deno",
+    },
+    "bun": {
+        "files": ["bun.lockb", "bunfig.toml"],
+        "exclude": ["package.json"],
+        "services": ["bun"],
+        "label": "Bun",
+    },
+    "elixir": {
+        "files": ["mix.exs"],
+        "services": ["elixir"],
+        "label": "Elixir",
+    },
+    "php": {
+        "files": ["composer.json"],
+        "services": ["php"],
+        "label": "PHP",
+    },
 }
 
 FRAMEWORK_SIGNATURES = {
@@ -51,6 +72,12 @@ FRAMEWORK_SIGNATURES = {
     "actix": {"imports": ["actix-web"], "port": 8080},
     "rails": {"files": ["config/routes.rb"], "port": 3000},
     "spring": {"files": ["src/main/java"], "port": 8080},
+    "laravel": {"files": ["artisan"], "port": 8000},
+    "phoenix": {"imports": ["phoenix"], "port": 4000},
+    "hugo": {"files": ["config.toml", "config.yaml", "hugo.toml", "hugo.yaml"], "port": 1313},
+    "jekyll": {"files": ["_config.yml", "Gemfile"], "port": 4000},
+    "astro": {"files": ["astro.config.mjs", "astro.config.ts"], "port": 4321},
+    "gatsby": {"files": ["gatsby-config.js", "gatsby-config.ts"], "port": 8000},
 }
 
 SERVICE_SIGNATURES = {
@@ -61,7 +88,12 @@ SERVICE_SIGNATURES = {
     "elasticsearch": {"pattern": r"elastic", "port": 9200},
     "kafka": {"pattern": r"kafka", "port": 9092},
     "minio": {"pattern": r"minio", "port": 9000},
+    "rabbitmq": {"pattern": r"rabbitmq|amqp", "port": 5672},
+    "nats": {"pattern": r"nats", "port": 4222},
 }
+
+GRAPHQL_FILES = ["schema.graphql", "schema.gql"]
+STATIC_SITE_INDICATORS = ["public/", "static/", "_site/", "dist/"]
 
 DOCKER_FILES = ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore"]
 TERRAFORM_FILES = ["main.tf", "variables.tf", "outputs.tf", "terraform.tfstate"]
@@ -78,6 +110,8 @@ class StackInfo:
         self.has_docker = False
         self.has_terraform = False
         self.has_ci = False
+        self.has_graphql = False
+        self.is_static_site = False
         self.port: Optional[int] = None
 
     @property
@@ -107,6 +141,8 @@ class StackInfo:
             "services": self.services,
             "docker": self.has_docker,
             "terraform": self.has_terraform,
+            "graphql": self.has_graphql,
+            "static_site": self.is_static_site,
             "port": self.port,
         }
 
@@ -191,5 +227,15 @@ def detect_stack(path: Optional[str] = None) -> StackInfo:
         "Jenkinsfile",
         ".circleci",
     ]) or (project_path / ".github" / "workflows").is_dir()
+
+    info.has_graphql = _check_files(project_path, GRAPHQL_FILES)
+    graphql_dirs = list(project_path.rglob("*.graphql"))[:5] if not info.has_graphql else []
+    if not info.has_graphql and graphql_dirs:
+        info.has_graphql = True
+
+    if any(fw in ("hugo", "jekyll", "astro", "gatsby") for fw in info.frameworks):
+        info.is_static_site = True
+    if _check_files(project_path, STATIC_SITE_INDICATORS):
+        info.is_static_site = True
 
     return info
