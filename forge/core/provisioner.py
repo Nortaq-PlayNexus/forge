@@ -189,11 +189,15 @@ resource "azurerm_container_registry" "acr" {
 
 
 def generate_dockerfile(stack) -> str:
-    """Generate a Dockerfile for the detected stack with multi-stage builds, non-root user, and health check."""
+    """Generate a Dockerfile for the detected stack with multi-stage builds,
+    non-root user, and health check."""
     lang = stack.primary_language
     port = stack.port or 8080
 
-    health_check = f"HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n  CMD curl -f http://localhost:{port}/health || exit 1"
+    health_check = (
+        f"HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n"
+        f"  CMD curl -f http://localhost:{port}/health || exit 1"
+    )
 
     if lang == "python":
         return f"""FROM python:3.12-slim AS builder

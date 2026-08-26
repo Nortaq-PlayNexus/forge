@@ -45,7 +45,10 @@ class CostAlert:
 
     def status(self, cost: float) -> str:
         if self.check(cost):
-            return f"[bold red]ALERT:[/bold red] ${cost:.2f} exceeds threshold of ${self.threshold:.2f}"
+            return (
+                f"[bold red]ALERT:[/bold red] ${cost:.2f} "
+                f"exceeds threshold of ${self.threshold:.2f}"
+            )
         return f"[green]OK:[/green] ${cost:.2f} is within ${self.threshold:.2f} threshold"
 
 

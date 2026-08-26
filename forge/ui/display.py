@@ -192,7 +192,8 @@ def print_cost_comparison(comparisons: list[dict]):
 
     console.print(table)
     console.print(
-        f"\n[dim]Best option: [bold]{comparisons[0]['provider'].upper()}[/bold] at ${comparisons[0]['total']:.2f}/mo[/dim]"
+        f"\n[dim]Best option: [bold]{comparisons[0]['provider'].upper()}[/bold] "
+        f"at ${comparisons[0]['total']:.2f}/mo[/dim]"
     )
 
 
