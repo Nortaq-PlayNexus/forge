@@ -3,17 +3,15 @@
 Creates and manages deployment snapshots for rollback capability.
 """
 
-import json
 import hashlib
+import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-
 
 SNAPSHOTS_DIR = ".forge/snapshots"
 
 
-def _snapshots_path(base: Optional[Path] = None) -> Path:
+def _snapshots_path(base: Path | None = None) -> Path:
     p = (base or Path.cwd()) / SNAPSHOTS_DIR
     p.mkdir(parents=True, exist_ok=True)
     return p
@@ -27,7 +25,7 @@ def _snapshot_id(state: dict) -> str:
 class RollbackManager:
     """Manages deployment snapshots for rollback."""
 
-    def __init__(self, base_path: Optional[Path] = None):
+    def __init__(self, base_path: Path | None = None):
         self.base = base_path or Path.cwd()
         self.dir = _snapshots_path(self.base)
 

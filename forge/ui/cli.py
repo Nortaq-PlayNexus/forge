@@ -9,26 +9,37 @@ from pathlib import Path
 
 from forge import __version__
 from forge.core.detector import detect_stack
-from forge.core.provisioner import (
-    generate_terraform, generate_dockerfile,
-    generate_docker_compose, generate_terraform_modules,
-    generate_kubernetes, generate_helm_chart,
-    generate_github_actions, generate_gitlab_ci,
-)
-from forge.core.estimator import estimate_cost, compare_providers, estimate_reserved, estimate_spot
-from forge.core.preview import generate_preview, format_preview
+from forge.core.estimator import compare_providers, estimate_cost, estimate_reserved, estimate_spot
+from forge.core.preview import generate_preview
 from forge.core.provider_manager import (
-    check_provider, get_account_info, list_available_providers,
-    check_provider_health, get_provider_limits, list_regions,
+    check_provider,
+    get_account_info,
+    list_available_providers,
+)
+from forge.core.provisioner import (
+    generate_docker_compose,
+    generate_dockerfile,
+    generate_github_actions,
+    generate_gitlab_ci,
+    generate_terraform_modules,
 )
 from forge.core.rollback import RollbackManager
 from forge.core.secrets import SecretsManager
 from forge.ui.display import (
-    show_banner, show_stack, show_providers, show_preview,
-    show_cost, show_generated_files, show_deploy_result,
-    show_error, show_warning, show_success, console,
-    print_kubernetes, print_cost_comparison, print_rollback_options,
+    console,
     print_ci_config,
+    print_cost_comparison,
+    print_rollback_options,
+    show_banner,
+    show_cost,
+    show_deploy_result,
+    show_error,
+    show_generated_files,
+    show_preview,
+    show_providers,
+    show_stack,
+    show_success,
+    show_warning,
 )
 
 
@@ -156,8 +167,8 @@ def cmd_deploy(args):
     show_deploy_result(True, f"Deployment files generated for {args.provider.upper()}")
     console.print("\n[dim]Next steps:[/dim]")
     console.print(f"  1. Review generated files in {path}")
-    console.print(f"  2. Build and push Docker image")
-    console.print(f"  3. Run [bold]terraform apply[/bold] to provision infrastructure")
+    console.print("  2. Build and push Docker image")
+    console.print("  3. Run [bold]terraform apply[/bold] to provision infrastructure")
 
     return 0
 

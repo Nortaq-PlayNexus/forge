@@ -3,8 +3,6 @@
 Generates Terraform configs, Dockerfiles, and deployment manifests.
 """
 
-from pathlib import Path
-from typing import Optional
 
 
 def generate_terraform(stack, provider: str = "aws", region: str = "us-east-1") -> str:
@@ -37,17 +35,17 @@ variable "project_name" {{
 variable "environment" {{
   default = "production"
 }}''',
-        "azure": f'''provider "azurerm" {{
-  features {{}}
-}}
+        "azure": '''provider "azurerm" {
+  features {}
+}
 
-variable "project_name" {{
+variable "project_name" {
   default = "forge-deploy"
-}}
+}
 
-variable "environment" {{
+variable "environment" {
   default = "production"
-}}''',
+}''',
     }
 
     resources = []

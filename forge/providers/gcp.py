@@ -1,7 +1,6 @@
 """GCP provider operations."""
 
 import subprocess
-from typing import Optional
 
 
 def check_gcloud_cli() -> bool:
@@ -16,7 +15,7 @@ def check_gcloud_cli() -> bool:
         return False
 
 
-def get_project() -> Optional[str]:
+def get_project() -> str | None:
     """Get current GCP project."""
     try:
         result = subprocess.run(

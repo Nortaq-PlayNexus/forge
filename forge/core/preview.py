@@ -3,10 +3,9 @@
 Generates a preview of what will be deployed before execution.
 """
 
-from typing import Optional
 
 
-def generate_preview(stack, provider: str, config: Optional[dict] = None) -> dict:
+def generate_preview(stack, provider: str, config: dict | None = None) -> dict:
     """Generate deployment preview."""
     config = config or {}
 

@@ -1,8 +1,7 @@
 """Cloud provider manager."""
 
-from typing import Optional
-from forge.providers import aws, gcp, azure
 
+from forge.providers import aws, azure, gcp
 
 PROVIDERS = {
     "aws": {
@@ -34,7 +33,7 @@ def check_provider(name: str) -> bool:
     return provider["check"]()
 
 
-def get_account_info(name: str) -> Optional[str]:
+def get_account_info(name: str) -> str | None:
     """Get account/project ID for a provider."""
     provider = PROVIDERS.get(name)
     if not provider:

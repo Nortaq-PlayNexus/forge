@@ -4,8 +4,6 @@ Scans a directory and identifies the tech stack, frameworks, and services needed
 """
 
 from pathlib import Path
-from typing import Optional
-
 
 STACK_SIGNATURES = {
     "python": {
@@ -112,14 +110,14 @@ class StackInfo:
         self.has_ci = False
         self.has_graphql = False
         self.is_static_site = False
-        self.port: Optional[int] = None
+        self.port: int | None = None
 
     @property
-    def primary_language(self) -> Optional[str]:
+    def primary_language(self) -> str | None:
         return self.languages[0] if self.languages else None
 
     @property
-    def primary_framework(self) -> Optional[str]:
+    def primary_framework(self) -> str | None:
         return self.frameworks[0] if self.frameworks else None
 
     @property
@@ -177,7 +175,7 @@ def _scan_package_json(path: Path) -> str:
         return ""
 
 
-def detect_stack(path: Optional[str] = None) -> StackInfo:
+def detect_stack(path: str | None = None) -> StackInfo:
     """Detect the project stack at the given path."""
     project_path = Path(path) if path else Path.cwd()
     info = StackInfo(project_path)

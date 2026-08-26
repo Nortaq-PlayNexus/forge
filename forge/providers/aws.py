@@ -1,8 +1,6 @@
 """AWS provider operations."""
 
 import subprocess
-import sys
-from typing import Optional
 
 
 def check_aws_cli() -> bool:
@@ -17,7 +15,7 @@ def check_aws_cli() -> bool:
         return False
 
 
-def get_account_id() -> Optional[str]:
+def get_account_id() -> str | None:
     """Get current AWS account ID."""
     try:
         result = subprocess.run(
@@ -45,7 +43,7 @@ def get_regions() -> list[str]:
     return ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]
 
 
-def ecr_login(region: str = "us-east-1") -> Optional[str]:
+def ecr_login(region: str = "us-east-1") -> str | None:
     """Get ECR login token and endpoint."""
     try:
         result = subprocess.run(

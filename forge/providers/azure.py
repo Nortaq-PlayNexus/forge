@@ -1,7 +1,6 @@
 """Azure provider operations."""
 
 import subprocess
-from typing import Optional
 
 
 def check_az_cli() -> bool:
@@ -16,7 +15,7 @@ def check_az_cli() -> bool:
         return False
 
 
-def get_subscription() -> Optional[str]:
+def get_subscription() -> str | None:
     """Get current Azure subscription ID."""
     try:
         result = subprocess.run(

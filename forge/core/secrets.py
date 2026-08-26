@@ -4,13 +4,9 @@ Handles encryption/decryption of environment variables and .env file management.
 """
 
 import base64
-import hashlib
-import json
 import os
 import re
 from pathlib import Path
-from typing import Optional
-
 
 KEY_FILE = ".forge/key"
 
@@ -18,11 +14,11 @@ KEY_FILE = ".forge/key"
 class SecretsManager:
     """Manages secrets encryption and .env files."""
 
-    def __init__(self, base_path: Optional[Path] = None):
+    def __init__(self, base_path: Path | None = None):
         self.base = base_path or Path.cwd()
         self.key_path = self.base / KEY_FILE
 
-    def _get_or_create_key(self, key: Optional[str] = None) -> bytes:
+    def _get_or_create_key(self, key: str | None = None) -> bytes:
         if key:
             return base64.b64decode(key.encode()) if len(key) > 32 else key.encode()
         if self.key_path.exists():
@@ -36,7 +32,7 @@ class SecretsManager:
         key_len = len(key)
         return bytes(b ^ key[i % key_len] for i, b in enumerate(data))
 
-    def encrypt_env(self, env_dict: dict, key: Optional[str] = None) -> dict:
+    def encrypt_env(self, env_dict: dict, key: str | None = None) -> dict:
         """Encrypt environment variables. Returns dict of encrypted values."""
         raw_key = self._get_or_create_key(key)
         encrypted = {}
@@ -45,7 +41,7 @@ class SecretsManager:
             encrypted[k] = encoded
         return encrypted
 
-    def decrypt_env(self, encrypted: dict, key: Optional[str] = None) -> dict:
+    def decrypt_env(self, encrypted: dict, key: str | None = None) -> dict:
         """Decrypt environment variables."""
         raw_key = self._get_or_create_key(key)
         decrypted = {}
@@ -64,7 +60,7 @@ class SecretsManager:
         out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return str(out_path)
 
-    def validate_env_file(self, path: Optional[str] = None) -> list[dict]:
+    def validate_env_file(self, path: str | None = None) -> list[dict]:
         """Validate .env file for common issues."""
         env_path = Path(path) if path else self.base / ".env"
         issues = []
