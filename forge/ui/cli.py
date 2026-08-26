@@ -128,7 +128,9 @@ def cmd_deploy(args):
 
     if not check_provider(args.provider):
         show_error(f"{args.provider.upper()} CLI not available or not configured")
-        console.print(f"  Install: https://docs.{args.provider}.amazon.com/cli/latest/userguide/getting-started-install.html")
+        console.print(
+            f"  Install: https://docs.{args.provider}.amazon.com/cli/latest/userguide/getting-started-install.html"
+        )
         return 1
 
     account = get_account_info(args.provider)
@@ -259,7 +261,9 @@ def cmd_compare(args):
         console.print("\n[bold cyan]Reserved Instance Estimates:[/bold cyan]")
         for years in (1, 3):
             est = estimate_reserved(stack, comparisons[0]["provider"], years)
-            console.print(f"  {years}yr reserved ({comparisons[0]['provider'].upper()}): ${est.total:.2f}/mo")
+            console.print(
+                f"  {years}yr reserved ({comparisons[0]['provider'].upper()}): ${est.total:.2f}/mo"
+            )
 
     if args.spot:
         console.print("\n[bold cyan]Spot Instance Estimates:[/bold cyan]")

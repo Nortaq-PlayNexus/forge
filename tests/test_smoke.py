@@ -9,6 +9,7 @@ import forge
 def test_package_importable():
     assert forge is not None
 
+
 def test_import_all_submodules():
     errors = []
     for mod in pkgutil.walk_packages(forge.__path__, forge.__name__ + "."):

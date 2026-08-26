@@ -55,11 +55,13 @@ class RollbackManager:
         for f in sorted(self.dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
-                snapshots.append({
-                    "id": data["id"],
-                    "timestamp": data["timestamp"],
-                    "keys": list(data.get("state", {}).keys()),
-                })
+                snapshots.append(
+                    {
+                        "id": data["id"],
+                        "timestamp": data["timestamp"],
+                        "keys": list(data.get("state", {}).keys()),
+                    }
+                )
             except (json.JSONDecodeError, KeyError):
                 continue
         return snapshots

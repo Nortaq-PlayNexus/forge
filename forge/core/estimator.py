@@ -9,6 +9,7 @@ from dataclasses import dataclass
 @dataclass
 class CostEstimate:
     """Monthly cost estimate."""
+
     compute: float = 0.0
     database: float = 0.0
     cache: float = 0.0
@@ -33,6 +34,7 @@ class CostEstimate:
 @dataclass
 class CostAlert:
     """Threshold-based cost alert."""
+
     threshold: float = 50.0
     message: str = ""
     triggered: bool = False
@@ -112,7 +114,6 @@ def estimate_cost(stack, provider: str = "aws", tier: str = "small") -> CostEsti
     est = CostEstimate()
     pricing = PRICING.get(provider, PRICING["aws"])
 
-    tier_key = f"compute_{provider}"
     if tier == "micro":
         est.compute = pricing.get(f"compute_{provider}_micro", pricing.get("compute_fargate", 10.0))
     elif tier == "small":
@@ -137,11 +138,13 @@ def compare_providers(stack, tier: str = "small") -> list[dict]:
     results = []
     for provider in ("aws", "gcp", "azure"):
         est = estimate_cost(stack, provider, tier)
-        results.append({
-            "provider": provider,
-            "estimate": est,
-            "total": est.total,
-        })
+        results.append(
+            {
+                "provider": provider,
+                "estimate": est,
+                "total": est.total,
+            }
+        )
     results.sort(key=lambda x: x["total"])
     return results
 
@@ -151,8 +154,8 @@ def estimate_reserved(stack, provider: str = "aws", years: int = 1) -> CostEstim
     est = estimate_cost(stack, provider)
     pricing = PRICING.get(provider, PRICING["aws"])
     discount = pricing.get(f"reserved_{years}yr_discount", 0.40)
-    est.compute *= (1 - discount)
-    est.database *= (1 - discount)
+    est.compute *= 1 - discount
+    est.database *= 1 - discount
     return est
 
 
@@ -161,5 +164,5 @@ def estimate_spot(stack, provider: str = "aws") -> CostEstimate:
     est = estimate_cost(stack, provider)
     pricing = PRICING.get(provider, PRICING["aws"])
     discount = pricing.get("spot_discount", 0.70)
-    est.compute *= (1 - discount)
+    est.compute *= 1 - discount
     return est

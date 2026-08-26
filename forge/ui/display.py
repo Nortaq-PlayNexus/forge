@@ -85,7 +85,9 @@ def show_preview(preview: dict):
         for r in preview["resources"]:
             lines.append(f"  [blue]~[/blue] {r}")
 
-    console.print(Panel("\n".join(lines), title="Deployment Preview", border_style="yellow", padding=(1, 2)))
+    console.print(
+        Panel("\n".join(lines), title="Deployment Preview", border_style="yellow", padding=(1, 2))
+    )
 
 
 def show_cost(est):
@@ -121,19 +123,23 @@ def show_generated_files(files: dict[str, str]):
 def show_deploy_result(success: bool, message: str):
     """Show deployment result."""
     if success:
-        console.print(Panel(
-            f"[green]✓ {message}[/green]",
-            title="Deploy Complete",
-            border_style="green",
-            padding=(0, 2),
-        ))
+        console.print(
+            Panel(
+                f"[green]✓ {message}[/green]",
+                title="Deploy Complete",
+                border_style="green",
+                padding=(0, 2),
+            )
+        )
     else:
-        console.print(Panel(
-            f"[red]✗ {message}[/red]",
-            title="Deploy Failed",
-            border_style="red",
-            padding=(0, 2),
-        ))
+        console.print(
+            Panel(
+                f"[red]✗ {message}[/red]",
+                title="Deploy Failed",
+                border_style="red",
+                padding=(0, 2),
+            )
+        )
 
 
 def show_error(message: str):
@@ -185,7 +191,9 @@ def print_cost_comparison(comparisons: list[dict]):
         )
 
     console.print(table)
-    console.print(f"\n[dim]Best option: [bold]{comparisons[0]['provider'].upper()}[/bold] at ${comparisons[0]['total']:.2f}/mo[/dim]")
+    console.print(
+        f"\n[dim]Best option: [bold]{comparisons[0]['provider'].upper()}[/bold] at ${comparisons[0]['total']:.2f}/mo[/dim]"
+    )
 
 
 def print_rollback_options(snapshots: list[dict]):

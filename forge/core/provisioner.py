@@ -4,7 +4,6 @@ Generates Terraform configs, Dockerfiles, and deployment manifests.
 """
 
 
-
 def generate_terraform(stack, provider: str = "aws", region: str = "us-east-1") -> str:
     """Generate Terraform configuration for the detected stack."""
     services = stack.services or []
@@ -35,7 +34,7 @@ variable "project_name" {{
 variable "environment" {{
   default = "production"
 }}''',
-        "azure": '''provider "azurerm" {
+        "azure": """provider "azurerm" {
   features {}
 }
 
@@ -45,13 +44,14 @@ variable "project_name" {
 
 variable "environment" {
   default = "production"
-}''',
+}""",
     }
 
     resources = []
 
     if provider == "aws":
-        resources.append('''
+        resources.append(
+            """
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-${var.environment}"
 }
@@ -67,18 +67,23 @@ resource "aws_ecs_task_definition" "app" {
     name  = "app"
     image = "${aws_ecr_repository.app.repository_url}:latest"
     portMappings = [{
-      containerPort = ''' + str(stack.port or 8080) + '''
-      hostPort      = ''' + str(stack.port or 8080) + '''
+      containerPort = """
+            + str(stack.port or 8080)
+            + """
+      hostPort      = """
+            + str(stack.port or 8080)
+            + """
     }]
   }])
 }
 
 resource "aws_ecr_repository" "app" {
   name = "${var.project_name}"
-}''')
+}"""
+        )
 
         if has_db:
-            resources.append('''
+            resources.append("""
 resource "aws_db_instance" "main" {
   identifier     = "${var.project_name}-db"
   engine         = "postgres"
@@ -94,30 +99,35 @@ resource "aws_db_instance" "main" {
 
 variable "db_password" {
   sensitive = true
-}''')
+}""")
 
         if has_redis:
-            resources.append('''
+            resources.append("""
 resource "aws_elasticache_cluster" "cache" {
   cluster_id      = "${var.project_name}-cache"
   engine          = "redis"
   node_type       = "cache.t3.micro"
   num_cache_nodes = 1
   port            = 6379
-}''')
+}""")
 
     elif provider == "gcp":
-        resources.append('''
+        resources.append(
+            '''
 resource "google_cloud_run_service" "app" {
   name     = "${var.project_name}"
-  location = "''' + region + '''"
+  location = "'''
+            + region
+            + """"
 
   template {
     spec {
       containers {
         image = "gcr.io/${var.project_name}/app:latest"
         ports {
-          container_port = ''' + str(stack.port or 8080) + '''
+          container_port = """
+            + str(stack.port or 8080)
+            + '''
         }
       }
     }
@@ -125,13 +135,17 @@ resource "google_cloud_run_service" "app" {
 }
 
 resource "google_artifact_registry_repository" "app" {
-  location      = "''' + region + '''"
+  location      = "'''
+            + region
+            + """"
   repository_id = "${var.project_name}"
   format        = "DOCKER"
-}''')
+}"""
+        )
 
     elif provider == "azure":
-        resources.append('''
+        resources.append(
+            """
 resource "azurerm_container_group" "app" {
   name                = "${var.project_name}-app"
   location            = azurerm_resource_group.main.location
@@ -145,7 +159,9 @@ resource "azurerm_container_group" "app" {
     memory = "1.0"
 
     ports {
-      port     = ''' + str(stack.port or 8080) + '''
+      port     = """
+            + str(stack.port or 8080)
+            + '''
       protocol = "TCP"
     }
   }
@@ -153,7 +169,9 @@ resource "azurerm_container_group" "app" {
 
 resource "azurerm_resource_group" "main" {
   name     = "${var.project_name}-rg"
-  location = "''' + region + '''"
+  location = "'''
+            + region
+            + """"
 }
 
 resource "azurerm_container_registry" "acr" {
@@ -161,24 +179,24 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   sku                 = "Basic"
-}''')
+}"""
+        )
 
-    return f'''{provider_block.get(provider, provider_block["aws"])}
+    return f"""{provider_block.get(provider, provider_block["aws"])}
 
 {"".join(resources)}
-'''
+"""
 
 
 def generate_dockerfile(stack) -> str:
     """Generate a Dockerfile for the detected stack with multi-stage builds, non-root user, and health check."""
     lang = stack.primary_language
-    fw = stack.primary_framework
     port = stack.port or 8080
 
     health_check = f"HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n  CMD curl -f http://localhost:{port}/health || exit 1"
 
     if lang == "python":
-        return f'''FROM python:3.12-slim AS builder
+        return f"""FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
@@ -201,9 +219,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["python", "-m", "forge.app"]
-'''
+"""
     elif lang == "node":
-        return f'''FROM node:20-slim AS builder
+        return f"""FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -225,9 +243,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["node", "src/index.js"]
-'''
+"""
     elif lang == "go":
-        return f'''FROM golang:1.22-alpine AS builder
+        return f"""FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -247,9 +265,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["/server"]
-'''
+"""
     elif lang == "rust":
-        return f'''FROM rust:1.77-slim AS builder
+        return f"""FROM rust:1.77-slim AS builder
 
 WORKDIR /app
 COPY . .
@@ -267,9 +285,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["/app"]
-'''
+"""
     elif lang == "java":
-        return f'''FROM eclipse-temurin:21-jdk-alpine AS builder
+        return f"""FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 COPY . .
@@ -287,9 +305,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["java", "-jar", "/app.jar"]
-'''
+"""
     elif lang == "ruby":
-        return f'''FROM ruby:3.3-slim AS builder
+        return f"""FROM ruby:3.3-slim AS builder
 
 WORKDIR /app
 COPY Gemfile Gemfile.lock ./
@@ -310,9 +328,9 @@ EXPOSE {port}
 {health_check}
 
 CMD ["bundle", "exec", "ruby", "app.rb"]
-'''
+"""
     else:
-        return f'''FROM alpine:3.19
+        return f"""FROM alpine:3.19
 
 RUN addgroup -S appuser && adduser -S appuser -G appuser
 
@@ -325,7 +343,7 @@ EXPOSE {port}
 {health_check}
 
 CMD ["./start.sh"]
-'''
+"""
 
 
 def generate_docker_compose(stack) -> str:
@@ -364,18 +382,18 @@ def generate_docker_compose(stack) -> str:
 
     volumes = "\nvolumes:\n  pgdata:" if any(s in stack.services for s in ["postgres"]) else ""
 
-    return f'''version: "3.8"
+    return f"""version: "3.8"
 
 services:
 {"".join(services)}
 {volumes}
-'''
+"""
 
 
 def generate_terraform_modules(stack, provider: str = "aws") -> dict[str, str]:
     """Generate Terraform module files."""
     main_tf = generate_terraform(stack, provider)
-    variables_tf = '''variable "project_name" {
+    variables_tf = """variable "project_name" {
   description = "Project name for resource naming"
   type        = string
 }
@@ -390,9 +408,9 @@ variable "db_password" {
   description = "Database password"
   type        = string
   sensitive   = true
-}'''
+}"""
 
-    outputs_tf = '''output "app_url" {
+    outputs_tf = """output "app_url" {
   description = "Application endpoint URL"
   value       = aws_ecs_cluster.main.name
 }
@@ -400,7 +418,7 @@ variable "db_password" {
 output "db_endpoint" {
   description = "Database endpoint"
   value       = aws_db_instance.main.endpoint
-}'''
+}"""
 
     return {
         "main.tf": main_tf,
@@ -414,7 +432,7 @@ def generate_kubernetes(stack) -> dict[str, str]:
     port = stack.port or 8080
     app_name = "forge-app"
 
-    deployment = f'''apiVersion: apps/v1
+    deployment = f"""apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {app_name}
@@ -454,9 +472,9 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "500m"
-'''
+"""
 
-    service = f'''apiVersion: v1
+    service = f"""apiVersion: v1
 kind: Service
 metadata:
   name: {app_name}
@@ -468,9 +486,9 @@ spec:
       port: 80
       targetPort: {port}
   type: ClusterIP
-'''
+"""
 
-    ingress = f'''apiVersion: networking.k8s.io/v1
+    ingress = f"""apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {app_name}
@@ -488,7 +506,7 @@ spec:
                 name: {app_name}
                 port:
                   number: 80
-'''
+"""
 
     return {
         "deployment.yaml": deployment,
@@ -502,15 +520,15 @@ def generate_helm_chart(stack) -> dict[str, str]:
     port = stack.port or 8080
     app_name = "forge-app"
 
-    chart_yaml = f'''apiVersion: v2
+    chart_yaml = f"""apiVersion: v2
 name: {app_name}
 description: A Helm chart for {app_name}
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
-'''
+"""
 
-    values_yaml = f'''replicaCount: 2
+    values_yaml = f"""replicaCount: 2
 
 image:
   repository: {app_name}
@@ -542,53 +560,57 @@ autoscaling:
   enabled: false
   minReplicas: 2
   maxReplicas: 10
-'''
+"""
 
     deployment_tmpl = (
-        'apiVersion: apps/v1\n'
-        'kind: Deployment\n'
-        'metadata:\n'
-        '  name: ' + '{{ include "' + app_name + '.fullname" . }}' + '\n'
-        '  labels:\n'
-        '    ' + '{{- include "' + app_name + '.labels" . | nindent 4 }}' + '\n'
-        'spec:\n'
-        '  ' + '{{- if not .Values.autoscaling.enabled }}' + '\n'
-        '  replicas: ' + '{{ .Values.replicaCount }}' + '\n'
-        '  ' + '{{- end }}' + '\n'
-        '  selector:\n'
-        '    matchLabels:\n'
-        '      ' + '{{- include "' + app_name + '.selectorLabels" . | nindent 6 }}' + '\n'
-        '  template:\n'
-        '    metadata:\n'
-        '      labels:\n'
-        '        ' + '{{- include "' + app_name + '.selectorLabels" . | nindent 8 }}' + '\n'
-        '    spec:\n'
-        '      containers:\n'
-        '        - name: ' + '{{ .Chart.Name }}' + '\n'
-        '          image: "' + '{{ .Values.image.repository }}' + ':' + '{{ .Values.image.tag }}' + '"\n'
-        '          ports:\n'
-        '            - containerPort: ' + str(port) + '\n'
-        '          resources:\n'
-        '            ' + '{{- toYaml .Values.resources | nindent 12 }}' + '\n'
+        "apiVersion: apps/v1\n"
+        "kind: Deployment\n"
+        "metadata:\n"
+        "  name: " + '{{ include "' + app_name + '.fullname" . }}' + "\n"
+        "  labels:\n"
+        "    " + '{{- include "' + app_name + '.labels" . | nindent 4 }}' + "\n"
+        "spec:\n"
+        "  " + "{{- if not .Values.autoscaling.enabled }}" + "\n"
+        "  replicas: " + "{{ .Values.replicaCount }}" + "\n"
+        "  " + "{{- end }}" + "\n"
+        "  selector:\n"
+        "    matchLabels:\n"
+        "      " + '{{- include "' + app_name + '.selectorLabels" . | nindent 6 }}' + "\n"
+        "  template:\n"
+        "    metadata:\n"
+        "      labels:\n"
+        "        " + '{{- include "' + app_name + '.selectorLabels" . | nindent 8 }}' + "\n"
+        "    spec:\n"
+        "      containers:\n"
+        "        - name: " + "{{ .Chart.Name }}" + "\n"
+        '          image: "'
+        + "{{ .Values.image.repository }}"
+        + ":"
+        + "{{ .Values.image.tag }}"
+        + '"\n'
+        "          ports:\n"
+        "            - containerPort: " + str(port) + "\n"
+        "          resources:\n"
+        "            " + "{{- toYaml .Values.resources | nindent 12 }}" + "\n"
     )
 
     helpers_tpl = (
         '{{- define "' + app_name + '.fullname" -}}\n'
-        '{{- if .Values.fullnameOverride }}\n'
+        "{{- if .Values.fullnameOverride }}\n"
         '{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}\n'
-        '{{- else }}\n'
+        "{{- else }}\n"
         '{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}\n'
-        '{{- end }}\n'
-        '{{- end }}\n'
-        '\n'
+        "{{- end }}\n"
+        "{{- end }}\n"
+        "\n"
         '{{- define "' + app_name + '.labels" -}}\n'
-        'helm.sh/chart: ' + '{{ .Chart.Name }}' + '-' + '{{ .Chart.Version }}' + '\n'
+        "helm.sh/chart: " + "{{ .Chart.Name }}" + "-" + "{{ .Chart.Version }}" + "\n"
         '{{ include "' + app_name + '.selectorLabels" . }}\n'
-        '{{- end }}\n'
-        '\n'
+        "{{- end }}\n"
+        "\n"
         '{{- define "' + app_name + '.selectorLabels" -}}\n'
-        'app: ' + '{{ .Chart.Name }}' + '\n'
-        '{{- end }}\n'
+        "app: " + "{{ .Chart.Name }}" + "\n"
+        "{{- end }}\n"
     )
 
     return {
@@ -603,34 +625,36 @@ def generate_github_actions(stack, provider: str = "aws") -> str:
     """Generate GitHub Actions workflow."""
     app_name = "forge-app"
     return (
-        'name: Deploy\n'
-        '\n'
-        'on:\n'
-        '  push:\n'
-        '    branches: [main]\n'
-        '  workflow_dispatch:\n'
-        '\n'
-        'env:\n'
-        '  APP_NAME: ' + app_name + '\n'
-        '  PROVIDER: ' + provider + '\n'
-        '\n'
-        'jobs:\n'
-        '  build-and-deploy:\n'
-        '    runs-on: ubuntu-latest\n'
-        '    steps:\n'
-        '      - uses: actions/checkout@v4\n'
-        '\n'
-        '      - name: Set up Docker Buildx\n'
-        '        uses: docker/setup-buildx-action@v3\n'
-        '\n'
-        '      - name: Build Docker image\n'
-        '        run: docker build -t ${{ env.APP_NAME }}:${{ github.sha }} .\n'
-        '\n'
-        '      - name: Run tests\n'
+        "name: Deploy\n"
+        "\n"
+        "on:\n"
+        "  push:\n"
+        "    branches: [main]\n"
+        "  workflow_dispatch:\n"
+        "\n"
+        "env:\n"
+        "  APP_NAME: " + app_name + "\n"
+        "  PROVIDER: " + provider + "\n"
+        "\n"
+        "jobs:\n"
+        "  build-and-deploy:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "\n"
+        "      - name: Set up Docker Buildx\n"
+        "        uses: docker/setup-buildx-action@v3\n"
+        "\n"
+        "      - name: Build Docker image\n"
+        "        run: docker build -t ${{ env.APP_NAME }}:${{ github.sha }} .\n"
+        "\n"
+        "      - name: Run tests\n"
         '        run: echo "Add your test commands here"\n'
-        '\n'
-        '      - name: Deploy\n'
-        '        run: echo "Deploy to ' + provider.upper() + ' using the generated Terraform files"\n'
+        "\n"
+        "      - name: Deploy\n"
+        '        run: echo "Deploy to '
+        + provider.upper()
+        + ' using the generated Terraform files"\n'
     )
 
 
@@ -638,37 +662,37 @@ def generate_gitlab_ci(stack, provider: str = "aws") -> str:
     """Generate GitLab CI configuration."""
     app_name = "forge-app"
     return (
-        'stages:\n'
-        '  - build\n'
-        '  - test\n'
-        '  - deploy\n'
-        '\n'
-        'variables:\n'
-        '  APP_NAME: ' + app_name + '\n'
-        '\n'
-        'build:\n'
-        '  stage: build\n'
-        '  image: docker:latest\n'
-        '  services:\n'
-        '    - docker:dind\n'
-        '  script:\n'
-        '    - docker build -t ${APP_NAME}:${CI_COMMIT_SHA} .\n'
-        '    - docker tag ${APP_NAME}:${CI_COMMIT_SHA} ${APP_NAME}:latest\n'
-        '  only:\n'
-        '    - main\n'
-        '\n'
-        'test:\n'
-        '  stage: test\n'
-        '  script:\n'
+        "stages:\n"
+        "  - build\n"
+        "  - test\n"
+        "  - deploy\n"
+        "\n"
+        "variables:\n"
+        "  APP_NAME: " + app_name + "\n"
+        "\n"
+        "build:\n"
+        "  stage: build\n"
+        "  image: docker:latest\n"
+        "  services:\n"
+        "    - docker:dind\n"
+        "  script:\n"
+        "    - docker build -t ${APP_NAME}:${CI_COMMIT_SHA} .\n"
+        "    - docker tag ${APP_NAME}:${CI_COMMIT_SHA} ${APP_NAME}:latest\n"
+        "  only:\n"
+        "    - main\n"
+        "\n"
+        "test:\n"
+        "  stage: test\n"
+        "  script:\n"
         '    - echo "Add your test commands here"\n'
-        '  only:\n'
-        '    - main\n'
-        '\n'
-        'deploy:\n'
-        '  stage: deploy\n'
-        '  script:\n'
+        "  only:\n"
+        "    - main\n"
+        "\n"
+        "deploy:\n"
+        "  stage: deploy\n"
+        "  script:\n"
         '    - echo "Deploy to ' + provider.upper() + ' using the generated Terraform files"\n'
-        '  only:\n'
-        '    - main\n'
-        '  when: manual\n'
+        "  only:\n"
+        "    - main\n"
+        "  when: manual\n"
     )

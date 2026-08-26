@@ -79,7 +79,11 @@ FRAMEWORK_SIGNATURES = {
 }
 
 SERVICE_SIGNATURES = {
-    "postgres": {"files": ["docker-compose.yml", "docker-compose.yaml"], "pattern": r"postgres", "port": 5432},
+    "postgres": {
+        "files": ["docker-compose.yml", "docker-compose.yaml"],
+        "pattern": r"postgres",
+        "port": 5432,
+    },
     "redis": {"pattern": r"redis", "port": 6379},
     "mysql": {"pattern": r"mysql", "port": 3306},
     "mongo": {"pattern": r"mongo", "port": 27017},
@@ -168,6 +172,7 @@ def _scan_package_json(path: Path) -> str:
         return ""
     try:
         import json
+
         data = json.loads(pkg.read_text(encoding="utf-8"))
         deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
         return " ".join(deps.keys()).lower()
@@ -219,12 +224,18 @@ def detect_stack(path: str | None = None) -> StackInfo:
 
     info.has_docker = _check_files(project_path, DOCKER_FILES)
     info.has_terraform = _check_files(project_path, TERRAFORM_FILES)
-    info.has_ci = _check_files(project_path, [
-        ".github/workflows",
-        ".gitlab-ci.yml",
-        "Jenkinsfile",
-        ".circleci",
-    ]) or (project_path / ".github" / "workflows").is_dir()
+    info.has_ci = (
+        _check_files(
+            project_path,
+            [
+                ".github/workflows",
+                ".gitlab-ci.yml",
+                "Jenkinsfile",
+                ".circleci",
+            ],
+        )
+        or (project_path / ".github" / "workflows").is_dir()
+    )
 
     info.has_graphql = _check_files(project_path, GRAPHQL_FILES)
     graphql_dirs = list(project_path.rglob("*.graphql"))[:5] if not info.has_graphql else []

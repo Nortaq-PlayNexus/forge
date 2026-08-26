@@ -7,8 +7,7 @@ def check_aws_cli() -> bool:
     """Check if AWS CLI is installed and configured."""
     try:
         result = subprocess.run(
-            ["aws", "sts", "get-caller-identity"],
-            capture_output=True, text=True, timeout=10
+            ["aws", "sts", "get-caller-identity"], capture_output=True, text=True, timeout=10
         )
         return result.returncode == 0
     except (FileNotFoundError, subprocess.TimeoutExpired):
@@ -20,7 +19,9 @@ def get_account_id() -> str | None:
     try:
         result = subprocess.run(
             ["aws", "sts", "get-caller-identity", "--query", "Account", "--output", "text"],
-            capture_output=True, text=True, timeout=10
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -33,8 +34,18 @@ def get_regions() -> list[str]:
     """Get available AWS regions."""
     try:
         result = subprocess.run(
-            ["aws", "ec2", "describe-regions", "--query", "Regions[].RegionName", "--output", "text"],
-            capture_output=True, text=True, timeout=15
+            [
+                "aws",
+                "ec2",
+                "describe-regions",
+                "--query",
+                "Regions[].RegionName",
+                "--output",
+                "text",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
         )
         if result.returncode == 0:
             return result.stdout.strip().split()
@@ -48,7 +59,9 @@ def ecr_login(region: str = "us-east-1") -> str | None:
     try:
         result = subprocess.run(
             ["aws", "ecr", "get-login-password", "--region", region],
-            capture_output=True, text=True, timeout=30
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode == 0:
             return result.stdout.strip()

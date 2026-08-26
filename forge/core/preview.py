@@ -4,7 +4,6 @@ Generates a preview of what will be deployed before execution.
 """
 
 
-
 def generate_preview(stack, provider: str, config: dict | None = None) -> dict:
     """Generate deployment preview."""
     config = config or {}

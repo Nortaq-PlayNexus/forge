@@ -1,6 +1,5 @@
 """Cloud provider manager."""
 
-
 from forge.providers import aws, azure, gcp
 
 PROVIDERS = {
@@ -47,12 +46,14 @@ def list_available_providers() -> list[dict]:
     for name, info in PROVIDERS.items():
         available = info["check"]()
         account = info["account"]() if available else None
-        results.append({
-            "name": name,
-            "label": info["label"],
-            "available": available,
-            "account": account,
-        })
+        results.append(
+            {
+                "name": name,
+                "label": info["label"],
+                "available": available,
+                "account": account,
+            }
+        )
     return results
 
 
