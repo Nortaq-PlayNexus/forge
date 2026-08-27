@@ -1,16 +1,32 @@
-# ⚡ Forge
+<h1 align="center">Forge</h1>
 
-**Universal Deploy Engine** — Deploy any stack to any cloud from a single command.
+<p align="center">
+  <em>Universal Deploy Engine — Deploy any stack to any cloud from a single command.</em>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-cyan.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![CLI](https://img.shields.io/badge/CLI-enabled-brightgreen.svg)](#quick-start)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-cyan.svg" alt="License: MIT"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python 3.10+"></a>
+  <img src="https://img.shields.io/badge/CLI-enabled-brightgreen.svg" alt="CLI">
+</p>
+
+---
 
 ## What it does
 
 Forge detects your project's tech stack, generates deployment infrastructure (Terraform + Docker), estimates costs, and deploys to AWS, GCP, or Azure — all from one command.
 
 **No vendor lock-in. No YAML hell. No cloud console hopping.**
+
+---
+
+## Screenshots
+
+| Preview | Description |
+|---------|-------------|
+| Terminal output screenshots coming soon | |
+
+---
 
 ## Quick start
 
@@ -31,6 +47,8 @@ forge init --provider gcp
 forge deploy --provider aws -y
 ```
 
+---
+
 ## Commands
 
 | Command | Description |
@@ -40,6 +58,8 @@ forge deploy --provider aws -y
 | `forge preview [path]` | Preview deployment plan + cost estimate |
 | `forge init [path]` | Generate Dockerfile + Terraform configs |
 | `forge deploy [path]` | Full deploy with confirmation prompt |
+
+---
 
 ## Supported stacks
 
@@ -52,6 +72,8 @@ forge deploy --provider aws -y
 | Java | Spring Boot |
 | Ruby | Rails |
 
+---
+
 ## Supported clouds
 
 | Provider | Services |
@@ -59,6 +81,8 @@ forge deploy --provider aws -y
 | **AWS** | ECS Fargate, ECR, RDS, ElastiCache |
 | **GCP** | Cloud Run, Artifact Registry, Cloud SQL |
 | **Azure** | Container Instances, ACR, Azure DB |
+
+---
 
 ## How it works
 
@@ -72,6 +96,8 @@ forge deploy --provider aws
     ├─ Generate Dockerfile + Terraform configs
     └─ Output next steps for terraform apply
 ```
+
+---
 
 ## Cost estimation
 
@@ -91,10 +117,24 @@ Forge provides rough monthly cost estimates before deploying:
 ╰──────────────────────────────────────╯
 ```
 
+---
+
 ## Requirements
 
 - Python 3.10+
 - Cloud CLI configured (`aws`, `gcloud`, or `az`) for deploy commands
+
+---
+
+## Contributing
+
+We welcome contributions! Please see:
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+
+---
 
 ## License
 
